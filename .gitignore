@@ -1,0 +1,12 @@
+### Ruby template
+pkg/*.gem
+Gemfile.lock
+
+# Ignore rvm files
+.ruby-version
+.ruby-gemset
+.rvmrc
+
+# Ignore Byebug command history file.
+.byebug_history
+
