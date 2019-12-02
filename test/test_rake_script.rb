@@ -12,7 +12,7 @@ class TestRakeScript < Minitest::Test
   def test_cmd_with_stdout_and_stderr
     out = []
     err = []
-    @base.cmd 'echo "qwe"; 1>&2 echo "asd"', stdout: proc { |l| out << l }, stderr: proc { |l| err << l }
+    @base.cmd %q{bash -c 'echo "qwe"; 1>&2 echo "asd"'}, stdout: proc { |l| out << l }, stderr: proc { |l| err << l }
     assert_equal ["qwe\n"], out
     assert_equal ["asd\n"], err
   end
