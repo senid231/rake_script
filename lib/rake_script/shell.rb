@@ -33,12 +33,12 @@ module RakeScript
       options = arguments.last.is_a?(Hash) ? arguments.pop : {}
 
       # extract option keys
-      stdout = options[:stdout] || proc { |raw_line| STDOUT.puts(raw_line) }
-      stderr = options[:stderr] || proc { |raw_line| STDERR.puts(raw_line) }
-      env = options[:env] || {}
+      stdout = options.fetch(:stdout) { proc { |raw_line| STDOUT.puts(raw_line) } }
+      stderr = options.fetch(:stderr) { proc { |raw_line| STDERR.puts(raw_line) } }
+      env = options.fetch(:env, {})
       debug = options.fetch(:debug, true)
-      debug_color = options[:debug_color] || :light_cyan
-      debug_style = options[:debug_style] || :underlined
+      debug_color = options.fetch(:debug_color, :light_cyan)
+      debug_style = options.fetch(:debug_style, :underlined)
 
       # calculating command line
       env_str = env.map { |k, v| "#{k}=#{v}" }.join(' ')
