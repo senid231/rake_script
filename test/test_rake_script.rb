@@ -27,4 +27,8 @@ class TestRakeScript < Minitest::Test
   def test_cmd_failed
     assert_raises(RuntimeError) { @base.cmd('exit 1') }
   end
+
+  def test_posix_flags
+    assert_equal %w(-rf -v), @base.posix_flags('-rf', '-v': true)
+  end
 end

@@ -20,6 +20,7 @@ module RakeScript
           result.push(flag.to_s)
         end
       end
+      result
     end
 
     def remove_rf(*paths)
