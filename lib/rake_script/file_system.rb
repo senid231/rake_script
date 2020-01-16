@@ -53,5 +53,23 @@ module RakeScript
     def chdir(path)
       Dir.chdir(path) { yield }
     end
+
+    def append_file(filepath, string, verbose: false, before: nil, after: nil)
+      raise ArgumentError, "can't use :before and :after in same time" if before && after
+
+      after_index = nil
+      if after || before
+        content = File.read(filepath)
+        after_index = content.index(after || before)
+        return if after_index.nil?
+      end
+      after_index -= before.size if after_index && before
+
+      File.open(filepath, 'a+') do |f|
+        f.seek(after_index, IO::SEEK_SET) if after_index
+        f.write(string)
+      end
+      puts("Append #{string.inspect} to #{filepath}") if verbose
+    end
   end
 end
