@@ -54,8 +54,12 @@ module RakeScript
       Dir.chdir(path) { yield }
     end
 
-    def append_file(filepath, string, verbose: false, before: nil, after: nil)
+    def append_file(filepath, string, verbose: false, before: nil, after: nil, safe: false)
       raise ArgumentError, "can't use :before and :after in same time" if before && after
+
+      unless File.exist?(filepath)
+        return failure!(safe, verbose) { "can't find file at #{filepath}" }
+      end
 
       after_index = nil
       if after || before
@@ -69,7 +73,56 @@ module RakeScript
         f.seek(after_index, IO::SEEK_SET) if after_index
         f.write(string)
       end
-      puts("Append #{string.inspect} to #{filepath}") if verbose
+      puts_verbose("Append #{string.inspect} to #{filepath}") if verbose
+    end
+
+    # @param safe [Boolean]
+    # @param verbose [Boolean]
+    # @raise [ArgumentError]
+    # @return [nil]
+    # @example
+    #   unless File.exist?(filepath)
+    #     return failure!(true, true) { "can't find file at #{filepath}" }
+    #   end
+    def failure!(safe = false, verbose = false, &block)
+      raise ArgumentError, block.call unless safe
+      puts_verbose("[Error] #{block.call}") if verbose
+      nil
+    end
+
+    def puts_verbose(msg, color: :red, style: :normal)
+      if respond_to?(:puts_colored)
+        puts_colored(msg, color: color, style: style)
+      else
+        puts(msg)
+      end
+    end
+
+    def replace_file(filepath, new_string, old:, verbose: false, safe: false)
+      unless File.exist?(filepath)
+        return failure!(safe, verbose) { "can't find file at #{filepath}" }
+      end
+
+      content = File.read(filepath)
+      index_start = content.index(old)
+      if index_start.nil?
+        return failure!(safe, verbose) { "can't find #{old.inspect} in #{filepath}" }
+      end
+
+      if old.is_a?(Regexp)
+        old_string = old.match(content[index_start..-1]).to_a.first
+      else
+        old_string = old
+      end
+      index_end = index_start + old_string.size
+      new_content = content[0..(index_start - 1)] + new_string + content[index_end..-1]
+      # File.write(filepath, new_content, mode: 'w')
+      File.open(filepath, 'w') do |f|
+        f.sync = true
+        f.write(new_content)
+      end
+
+      puts_verbose("Replace #{old.inspect} with #{new_string.inspect} in #{filepath}") if verbose
     end
   end
 end
