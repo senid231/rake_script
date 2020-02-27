@@ -68,13 +68,22 @@ module RakeScript
     def raw_execute(command_line, stdout:, stderr:)
       Open3.popen3(command_line) do |_stdin_io, stdout_io, stderr_io, wait_thread|
         Thread.new do
-          until (raw_line = stdout_io.gets).nil? do
-            stdout.call(raw_line)
+          begin
+            until (raw_line = stdout_io.gets).nil? do
+              stdout.call(raw_line)
+            end
+          rescue IOError => _
+            # command process was closed and it's ok
           end
+
         end
         Thread.new do
-          until (raw_line = stderr_io.gets).nil? do
-            stderr.call(raw_line)
+          begin
+            until (raw_line = stderr_io.gets).nil? do
+              stderr.call(raw_line)
+            end
+          rescue IOError => _
+            # command process was closed and it's ok
           end
         end
         wait_thread.value
