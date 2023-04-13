@@ -48,7 +48,7 @@ module RakeScript
       raise ArgumentError, 'last argument must be options hash'.freeze unless options.is_a?(Hash)
       raise ArgumentError, 'provide at least one line'.freeze if lines.empty?
 
-      formatted_lines = lines.map { |line| format_text(line, options) }
+      formatted_lines = lines.map { |line| format_text(line, **options) }
       puts(*formatted_lines)
     end
 
